@@ -16,8 +16,8 @@ next-env.d.ts.bak
 *.local
 
 # Env
-.env
-!.env.example
+# .env
+# .env.example
 
 # Wrangler / Cloudflare
 .wrangler/
