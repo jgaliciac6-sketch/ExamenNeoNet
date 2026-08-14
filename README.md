@@ -52,6 +52,15 @@ Proyecto compuesto por un backend en **.NET (ASP.NET Core Web API)** y un fronte
 
 5. Abre `http://localhost:3000` en el navegador.
 
+## Validación de stock
+
+El stored procedure encargado de descontar la cantidad vendida valida el stock disponible antes de actualizarlo:
+
+- Si `PROStock >= @Cantidad`, se descuenta la cantidad y `@SUCCESS = 1`.
+- Si el stock es insuficiente, no se actualiza el producto, `@SUCCESS = 0` y `@MESSAGE = 'La cantidad de artículos es mayor al stock'`.
+
+Esta validación se realiza a nivel de base de datos (script `dataBaseBackup.sql`), por lo que cualquier venta que intente descontar más unidades de las disponibles será rechazada por el backend antes de completarse.
+
 ## Orden recomendado para correr el proyecto
 
 1. Ejecutar el script `dataBaseBackup.sql` para generar la base de datos.
