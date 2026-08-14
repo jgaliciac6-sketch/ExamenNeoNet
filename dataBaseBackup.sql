@@ -1,3 +1,4 @@
+CREATE DATABASE EsamenNeoNet
 USE [ExamenNeoNet]
 GO
 /****** Object:  Table [dbo].[EX_CLIENTE]    Script Date: 8/14/2026 1:04:02 AM ******/
