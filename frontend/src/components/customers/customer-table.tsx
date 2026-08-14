@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+
 import {
   Table,
   TableBody,
@@ -8,12 +11,13 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { Cliente } from "@/lib/types";
 
 export function CustomerTable({ customers }: { customers: Cliente[] }) {
   return (
     <div className="overflow-x-auto">
-      <Table className="min-w-[680px]">
+      <Table className="min-w-[720px]">
         <TableHeader>
           <TableRow className="border-border hover:bg-transparent">
             <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">
@@ -25,8 +29,11 @@ export function CustomerTable({ customers }: { customers: Cliente[] }) {
             <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">
               Email
             </TableHead>
-            <TableHead className="text-right text-xs uppercase tracking-wide text-muted-foreground">
+            <TableHead className="text-xs uppercase tracking-wide text-muted-foreground">
               Estado
+            </TableHead>
+            <TableHead className="text-right text-xs uppercase tracking-wide text-muted-foreground">
+              Ventas
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -54,7 +61,7 @@ export function CustomerTable({ customers }: { customers: Cliente[] }) {
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground">{customer.cliEmail}</TableCell>
-              <TableCell className="text-right">
+              <TableCell>
                 <Badge
                   variant="outline"
                   className={
@@ -66,11 +73,24 @@ export function CustomerTable({ customers }: { customers: Cliente[] }) {
                   {customer.cliEstado ? "Activo" : "Inactivo"}
                 </Badge>
               </TableCell>
+              <TableCell className="text-right">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-lg text-primary hover:bg-primary/10"
+                >
+                  <Link href={`/clientes/${customer.cliId}`}>
+                    Ver ventas
+                    <ArrowUpRight className="size-4" />
+                  </Link>
+                </Button>
+              </TableCell>
             </TableRow>
           ))}
           {customers.length === 0 && (
             <TableRow>
-              <TableCell colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
+              <TableCell colSpan={5} className="py-10 text-center text-sm text-muted-foreground">
                 No se encontraron clientes.
               </TableCell>
             </TableRow>

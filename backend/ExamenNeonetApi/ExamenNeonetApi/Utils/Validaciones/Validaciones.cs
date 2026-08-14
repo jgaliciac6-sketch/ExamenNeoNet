@@ -34,5 +34,38 @@ namespace RegistroSucursales.Utils.Validaciones
 
             return respuesta;
         }
-    }
+
+		public async Task<Response> ValidarDetalleVEnta(DetalleVenta objDetalleVenta)
+		{
+			Response respuesta = new Response
+			{
+				success = true
+			};
+
+			// Primero se valida el objeto para no acceder a sus propiedades
+			// cuando sea null.
+			if (objDetalleVenta == null)
+			{
+				respuesta.id = 0;
+				respuesta.message = "Falta el detalle de venta.";
+				respuesta.success = false;
+
+				return respuesta;
+			}
+
+			if (objDetalleVenta.DVNCantidad == 0 || 
+				objDetalleVenta.DVNPrecioUnitario == 0 || 
+				objDetalleVenta.DVNPROId == 0 ||
+				objDetalleVenta.DVNVENId == 0)
+			{
+				respuesta.id = 0;
+				respuesta.message = "Falta información del detalle de venta.";
+				respuesta.success = false;
+
+				return respuesta;
+			}
+
+			return respuesta;
+		}
+	}
 }

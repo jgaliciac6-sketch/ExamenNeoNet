@@ -1,12 +1,9 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, Gamepad2, Lock, User } from "lucide-react";
-import { toast } from "sonner";
 
 import heroImage from "@/assets/login-hero.jpg";
 import { Button } from "@/components/ui/button";
@@ -14,32 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
-import { login } from "@/lib/api/auth";
-import { setSession } from "@/lib/auth-storage";
+import { Login } from "@/actions/auth/login-action";
+import { initialActionState } from "@/actions/action-state";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [username, setUsername] = useState("admin");
-  const [password, setPassword] = useState("");
-
-  const mutation = useMutation({
-    mutationFn: login,
-    onSuccess: (data) => {
-      setSession({ username: data.nombre, token: data.token });
-      router.push("/ventas");
-    },
-    onError: () => {
-      toast.error("No se pudo iniciar sesión", {
-        description: "Usuario o contraseña incorrectos.",
-      });
-    },
-  });
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    mutation.mutate({ usrNombre: username, usrPassword: password });
-  }
+  const [state, formAction, isPending] = useActionState(Login, initialActionState);
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -81,32 +58,31 @@ export default function LoginPage() {
             Inicia sesión para acceder al sistema
           </p>
 
-          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
+          <form action={formAction} className="mt-8 space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="username">Usuario</Label>
+              <Label htmlFor="usrId">ID de usuario</Label>
               <div className="relative">
                 <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  id="username"
-                  name="username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="usrId"
+                  name="usrId"
+                  type="number"
+                  min="1"
+                  defaultValue="1"
                   className="h-11 pl-9"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Contraseña</Label>
+              <Label htmlFor="usrPassword">Contraseña</Label>
               <div className="relative">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  id="password"
-                  name="password"
+                  id="usrPassword"
+                  name="usrPassword"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                   className="h-11 px-9"
                 />
                 <button
@@ -127,12 +103,22 @@ export default function LoginPage() {
               </Label>
             </div>
 
+            {state.errors.length > 0 && (
+              <div className="space-y-1 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2">
+                {state.errors.map((error) => (
+                  <p key={error} className="text-xs text-destructive">
+                    {error}
+                  </p>
+                ))}
+              </div>
+            )}
+
             <Button
               type="submit"
               className="h-11 w-full rounded-xl text-sm font-medium"
-              disabled={mutation.isPending}
+              disabled={isPending}
             >
-              {mutation.isPending ? "Iniciando sesión..." : "Iniciar sesión"}
+              {isPending ? "Iniciando sesión..." : "Iniciar sesión"}
             </Button>
           </form>
 

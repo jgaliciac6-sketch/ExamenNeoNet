@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import { UserPlus } from "lucide-react";
 
 import { PageHeader } from "@/components/layout/page-header";
@@ -8,13 +8,28 @@ import { CustomerTable } from "@/components/customers/customer-table";
 import { CustomerFormSheet } from "@/components/customers/customer-form-sheet";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { getClientes } from "@/lib/api/clientes";
+import { getAllClientes } from "@/queries/cliente/get-all-clientes";
+import type { Cliente } from "@/lib/types";
 
 export default function ClientesPage() {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["clientes"],
-    queryFn: getClientes,
-  });
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  const load = useCallback(() => {
+    setLoading(true);
+    getAllClientes()
+      .then((data) => {
+        setClientes(data);
+        setLoadError(false);
+      })
+      .catch(() => setLoadError(true))
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <div className="space-y-6">
@@ -23,6 +38,7 @@ export default function ClientesPage() {
         description="Listado de clientes registrados."
         actions={
           <CustomerFormSheet
+            onCreated={load}
             trigger={
               <Button className="rounded-xl">
                 <UserPlus className="size-4" /> Nuevo cliente
@@ -34,15 +50,15 @@ export default function ClientesPage() {
 
       <Card className="rounded-2xl border-border">
         <CardContent className="px-0 sm:px-6">
-          {isLoading && (
+          {loading && (
             <p className="py-10 text-center text-sm text-muted-foreground">Cargando clientes...</p>
           )}
-          {isError && (
+          {!loading && loadError && (
             <p className="py-10 text-center text-sm text-muted-foreground">
               No se pudo cargar el listado de clientes.
             </p>
           )}
-          {data && <CustomerTable customers={data} />}
+          {!loading && !loadError && <CustomerTable customers={clientes} />}
         </CardContent>
       </Card>
     </div>

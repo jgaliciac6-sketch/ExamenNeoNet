@@ -7,10 +7,8 @@ export interface Usuario {
   usrEstado: boolean;
 }
 
-export interface LoginRequest {
-  usrNombre: string;
-  usrPassword: string;
-}
+// El body de POST /api/Login/Login se valida con LoginSchema (src/schemas/login.ts):
+// LoginController.cs valida por USRId (no por nombre) contra USP_GET_USER.
 
 // Forma real de la respuesta de POST /api/Login/Login (LoginController.cs), que
 // devuelve un objeto anónimo, no el modelo Usuario.

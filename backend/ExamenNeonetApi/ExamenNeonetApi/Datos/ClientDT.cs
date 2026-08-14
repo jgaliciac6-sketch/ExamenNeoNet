@@ -8,7 +8,7 @@ namespace ExamenNeonetApi.Datos
 	{
 		public async Task<List<Cliente>> GetClient(SqlConnection conn)
 		{
-			List<Cliente> lstEmpresa = new List<Cliente>();
+			List<Cliente> lstCliente = new List<Cliente>();
 
 			try
 			{
@@ -20,7 +20,7 @@ namespace ExamenNeonetApi.Datos
 
 				while (dr.Read())
 				{
-					lstEmpresa.Add(new Cliente()
+					lstCliente.Add(new Cliente()
 					{
 						CLIId = Convert.ToInt32(dr["CLIId"]),
 						CLINombre = dr["CLINombre"].ToString(),
@@ -35,7 +35,7 @@ namespace ExamenNeonetApi.Datos
 				new List<Cliente>();
 			}
 
-			return lstEmpresa;
+			return lstCliente;
 		}
 
 		public async Task<Response> ValidateEmail(SqlConnection conn, SqlTransaction tx, Cliente objCliente)

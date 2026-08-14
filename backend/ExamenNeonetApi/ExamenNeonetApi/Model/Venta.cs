@@ -8,5 +8,6 @@ namespace ExamenNeonetApi.Model
 		public Cliente VENCLIId { get; set; }
 		public string VENFecha {  get; set; }
 		public bool VENEstado { get; set; }
+		public List<DetalleVenta>? lstDetalleVenta { get; set; }
 	}
 }

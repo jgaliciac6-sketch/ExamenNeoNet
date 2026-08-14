@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-import { Gamepad2, LogOut, Package, Receipt, Users } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Gamepad2, LogOut, Package, Users } from "lucide-react";
 
 import {
   Sidebar,
@@ -18,32 +18,24 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { clearSession, getSession } from "@/lib/auth-storage";
+import { Logout } from "@/actions/auth/logout-action";
 
 const items = [
-  { title: "Ventas", url: "/ventas", icon: Receipt },
-  { title: "Productos", url: "/productos", icon: Package },
   { title: "Clientes", url: "/clientes", icon: Users },
+  { title: "Productos", url: "/productos", icon: Package },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ username }: { username?: string }) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = usePathname();
-  const router = useRouter();
-  const session = getSession();
 
   const isActive = (url: string) => pathname === url || pathname.startsWith(url + "/");
-
-  function handleLogout() {
-    clearSession();
-    router.push("/login");
-  }
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="px-3 py-4">
-        <Link href="/ventas" className="flex items-center gap-3">
+        <Link href="/clientes" className="flex items-center gap-3">
           <span className="brand-gradient-bg flex size-9 shrink-0 items-center justify-center rounded-xl shadow-md">
             <Gamepad2 className="size-5 text-primary-foreground" />
           </span>
@@ -80,26 +72,28 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           <Avatar className="size-9 border border-sidebar-border">
             <AvatarFallback className="brand-gradient-bg text-xs font-semibold text-primary-foreground">
-              {(session?.username ?? "AD").slice(0, 2).toUpperCase()}
+              {(username ?? "AD").slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="min-w-0 flex-1 leading-tight">
-              <p className="truncate text-sm font-medium">{session?.username ?? "Administrador"}</p>
+              <p className="truncate text-sm font-medium">{username ?? "Administrador"}</p>
               <p className="truncate text-xs text-muted-foreground">Administrador</p>
             </div>
           )}
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton
-              onClick={handleLogout}
-              tooltip="Cerrar sesión"
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="size-4" />
-              <span>Cerrar sesión</span>
-            </SidebarMenuButton>
+            <form action={Logout}>
+              <SidebarMenuButton
+                type="submit"
+                tooltip="Cerrar sesión"
+                className="w-full text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="size-4" />
+                <span>Cerrar sesión</span>
+              </SidebarMenuButton>
+            </form>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

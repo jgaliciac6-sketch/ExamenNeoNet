@@ -7,5 +7,6 @@
 		public int DVNPROId { get; set; }
 		public int DVNCantidad { get; set; }
 		public double DVNPrecioUnitario {  get; set; }
+		public bool DVNEstado { get; set; }
 	}
 }

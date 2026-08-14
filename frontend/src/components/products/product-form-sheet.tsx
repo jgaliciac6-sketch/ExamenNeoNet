@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useActionState, useEffect, useRef, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import {
@@ -17,60 +16,34 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { crearProducto } from "@/lib/api/productos";
+import { setNewProducto } from "@/actions/producto/set-new-producto-action";
+import { initialActionState } from "@/actions/action-state";
 
-interface Errors {
-  name?: string;
-  price?: string;
-  stock?: string;
-}
+export function ProductFormSheet({
+  trigger,
+  onCreated,
+}: {
+  trigger: ReactNode;
+  onCreated?: () => void;
+}) {
+  const [state, formAction, isPending] = useActionState(setNewProducto, initialActionState);
+  const formRef = useRef<HTMLFormElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
-export function ProductFormSheet({ trigger }: { trigger: ReactNode }) {
-  const [open, setOpen] = useState(false);
-  const [errors, setErrors] = useState<Errors>({});
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: crearProducto,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["productos"] });
-      toast.success("Producto creado correctamente.");
-      setOpen(false);
-    },
-    onError: () => {
-      toast.error("No se pudo crear el producto", {
-        description: "Intenta de nuevo más tarde.",
-      });
-    },
-  });
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const name = String(data.get("name") ?? "").trim();
-    const price = String(data.get("price") ?? "").trim();
-    const stock = String(data.get("stock") ?? "").trim();
-
-    const next: Errors = {};
-    if (!name) next.name = "El nombre es obligatorio.";
-    if (!price || Number(price) <= 0) next.price = "Ingresa un precio válido.";
-    if (stock === "" || Number(stock) < 0) next.stock = "Ingresa un stock válido.";
-    setErrors(next);
-    if (Object.keys(next).length > 0) return;
-
-    mutation.mutate({
-      proNombre: name,
-      proPrecio: Number(price),
-      proStock: Number(stock),
-      proEstado: true,
-    });
-  }
+  useEffect(() => {
+    if (state.success) {
+      toast.success(state.message ?? "Producto creado correctamente.");
+      formRef.current?.reset();
+      closeRef.current?.click();
+      onCreated?.();
+    }
+  }, [state, onCreated]);
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent className="w-full sm:max-w-md">
-        <form onSubmit={handleSubmit} className="flex h-full flex-col">
+        <form ref={formRef} action={formAction} className="flex h-full flex-col">
           <SheetHeader>
             <SheetTitle>Nuevo producto</SheetTitle>
             <SheetDescription>Agrega un videojuego al catálogo.</SheetDescription>
@@ -78,37 +51,44 @@ export function ProductFormSheet({ trigger }: { trigger: ReactNode }) {
 
           <div className="flex-1 space-y-5 overflow-y-auto px-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre</Label>
-              <Input id="name" name="name" placeholder="The Legend of Zelda" />
-              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+              <Label htmlFor="proNombre">Nombre</Label>
+              <Input id="proNombre" name="proNombre" placeholder="The Legend of Zelda" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">Precio (Q)</Label>
+              <Label htmlFor="proPrecio">Precio (Q)</Label>
               <Input
-                id="price"
-                name="price"
+                id="proPrecio"
+                name="proPrecio"
                 type="number"
                 step="0.01"
                 min="0"
                 placeholder="599.00"
               />
-              {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="stock">Stock</Label>
-              <Input id="stock" name="stock" type="number" min="0" placeholder="12" />
-              {errors.stock && <p className="text-xs text-destructive">{errors.stock}</p>}
+              <Label htmlFor="proStock">Stock</Label>
+              <Input id="proStock" name="proStock" type="number" min="0" placeholder="12" />
             </div>
+
+            {state.errors.length > 0 && (
+              <div className="space-y-1 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2">
+                {state.errors.map((error) => (
+                  <p key={error} className="text-xs text-destructive">
+                    {error}
+                  </p>
+                ))}
+              </div>
+            )}
           </div>
 
           <SheetFooter className="flex-row justify-end gap-2">
-            <SheetClose asChild>
+            <SheetClose ref={closeRef} asChild>
               <Button type="button" variant="outline" className="rounded-xl">
                 Cancelar
               </Button>
             </SheetClose>
-            <Button type="submit" className="rounded-xl" disabled={mutation.isPending}>
-              {mutation.isPending ? "Guardando..." : "Guardar producto"}
+            <Button type="submit" className="rounded-xl" disabled={isPending}>
+              {isPending ? "Guardando..." : "Guardar producto"}
             </Button>
           </SheetFooter>
         </form>

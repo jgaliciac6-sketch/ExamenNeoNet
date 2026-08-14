@@ -7,19 +7,15 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { getSession } from "@/lib/auth-storage";
 
 function titleFor(pathname: string) {
   if (pathname.startsWith("/productos")) return "Productos";
-  if (pathname.startsWith("/clientes")) return "Clientes";
-  if (pathname === "/ventas/nueva") return "Nueva venta";
-  if (pathname.startsWith("/ventas/")) return "Detalle de venta";
-  return "Ventas";
+  if (pathname.startsWith("/clientes/")) return "Ventas del cliente";
+  return "Clientes";
 }
 
-export function Header() {
+export function Header({ username }: { username?: string }) {
   const pathname = usePathname();
-  const session = getSession();
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-xl md:px-6">
@@ -47,7 +43,7 @@ export function Header() {
         </Button>
         <Avatar className="size-9 border border-border">
           <AvatarFallback className="brand-gradient-bg text-xs font-semibold text-primary-foreground">
-            {(session?.username ?? "AD").slice(0, 2).toUpperCase()}
+            {(username ?? "AD").slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </div>
