@@ -1,4 +1,7 @@
+"use client";
+
 import { useState, type FormEvent, type ReactNode } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import {
@@ -14,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { crearProducto } from "@/lib/api/productos";
 
 interface Errors {
   name?: string;
@@ -21,14 +25,24 @@ interface Errors {
   stock?: string;
 }
 
-/**
- * Formulario visual de producto.
- * Preparado para conectarse a una acción de servidor (crear/editar producto):
- * basta con reemplazar `handleSubmit` por la llamada correspondiente.
- */
 export function ProductFormSheet({ trigger }: { trigger: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: crearProducto,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["productos"] });
+      toast.success("Producto creado correctamente.");
+      setOpen(false);
+    },
+    onError: () => {
+      toast.error("No se pudo crear el producto", {
+        description: "Intenta de nuevo más tarde.",
+      });
+    },
+  });
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -44,11 +58,12 @@ export function ProductFormSheet({ trigger }: { trigger: ReactNode }) {
     setErrors(next);
     if (Object.keys(next).length > 0) return;
 
-    // TODO: conectar con la acción de servidor de creación de producto.
-    toast.success("Producto listo para guardar", {
-      description: "Pendiente de conectar la acción de servidor.",
+    mutation.mutate({
+      proNombre: name,
+      proPrecio: Number(price),
+      proStock: Number(stock),
+      proEstado: true,
     });
-    setOpen(false);
   }
 
   return (
@@ -69,7 +84,14 @@ export function ProductFormSheet({ trigger }: { trigger: ReactNode }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="price">Precio (Q)</Label>
-              <Input id="price" name="price" type="number" step="0.01" min="0" placeholder="599.00" />
+              <Input
+                id="price"
+                name="price"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="599.00"
+              />
               {errors.price && <p className="text-xs text-destructive">{errors.price}</p>}
             </div>
             <div className="space-y-2">
@@ -85,8 +107,8 @@ export function ProductFormSheet({ trigger }: { trigger: ReactNode }) {
                 Cancelar
               </Button>
             </SheetClose>
-            <Button type="submit" className="rounded-xl">
-              Guardar producto
+            <Button type="submit" className="rounded-xl" disabled={mutation.isPending}>
+              {mutation.isPending ? "Guardando..." : "Guardar producto"}
             </Button>
           </SheetFooter>
         </form>

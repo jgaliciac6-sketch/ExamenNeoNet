@@ -1,12 +1,8 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  Gamepad2,
-  LayoutDashboard,
-  LogOut,
-  Package,
-  Receipt,
-  Users,
-} from "lucide-react";
+"use client";
+
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import { Gamepad2, LogOut, Package, Receipt, Users } from "lucide-react";
 
 import {
   Sidebar,
@@ -22,26 +18,32 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { currentUser } from "@/lib/mock-data";
+import { clearSession, getSession } from "@/lib/auth-storage";
 
 const items = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Ventas", url: "/ventas", icon: Receipt },
   { title: "Productos", url: "/productos", icon: Package },
   { title: "Clientes", url: "/clientes", icon: Users },
-  { title: "Ventas", url: "/ventas", icon: Receipt },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const pathname = usePathname();
+  const router = useRouter();
+  const session = getSession();
 
   const isActive = (url: string) => pathname === url || pathname.startsWith(url + "/");
+
+  function handleLogout() {
+    clearSession();
+    router.push("/login");
+  }
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="px-3 py-4">
-        <Link to="/dashboard" className="flex items-center gap-3">
+        <Link href="/ventas" className="flex items-center gap-3">
           <span className="brand-gradient-bg flex size-9 shrink-0 items-center justify-center rounded-xl shadow-md">
             <Gamepad2 className="size-5 text-primary-foreground" />
           </span>
@@ -62,7 +64,7 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link to={item.url} className="flex items-center gap-3">
+                    <Link href={item.url} className="flex items-center gap-3">
                       <item.icon className="size-4" />
                       <span>{item.title}</span>
                     </Link>
@@ -78,23 +80,25 @@ export function AppSidebar() {
         <div className="flex items-center gap-3">
           <Avatar className="size-9 border border-sidebar-border">
             <AvatarFallback className="brand-gradient-bg text-xs font-semibold text-primary-foreground">
-              AD
+              {(session?.username ?? "AD").slice(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="min-w-0 flex-1 leading-tight">
-              <p className="truncate text-sm font-medium">{currentUser.name}</p>
-              <p className="truncate text-xs text-muted-foreground">{currentUser.role}</p>
+              <p className="truncate text-sm font-medium">{session?.username ?? "Administrador"}</p>
+              <p className="truncate text-xs text-muted-foreground">Administrador</p>
             </div>
           )}
         </div>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild tooltip="Cerrar sesión">
-              <Link to="/login" className="flex items-center gap-3 text-muted-foreground hover:text-foreground">
-                <LogOut className="size-4" />
-                <span>Cerrar sesión</span>
-              </Link>
+            <SidebarMenuButton
+              onClick={handleLogout}
+              tooltip="Cerrar sesión"
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <LogOut className="size-4" />
+              <span>Cerrar sesión</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

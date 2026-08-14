@@ -1,23 +1,25 @@
-import { useRouterState } from "@tanstack/react-router";
+"use client";
+
+import { usePathname } from "next/navigation";
 import { Bell, Search } from "lucide-react";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { currentUser } from "@/lib/mock-data";
+import { getSession } from "@/lib/auth-storage";
 
 function titleFor(pathname: string) {
   if (pathname.startsWith("/productos")) return "Productos";
   if (pathname.startsWith("/clientes")) return "Clientes";
   if (pathname === "/ventas/nueva") return "Nueva venta";
   if (pathname.startsWith("/ventas/")) return "Detalle de venta";
-  if (pathname.startsWith("/ventas")) return "Ventas";
-  return "Dashboard";
+  return "Ventas";
 }
 
 export function Header() {
-  const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const pathname = usePathname();
+  const session = getSession();
 
   return (
     <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur-xl md:px-6">
@@ -34,13 +36,18 @@ export function Header() {
             className="h-9 w-44 rounded-xl border-border bg-secondary/60 pl-9 lg:w-64"
           />
         </div>
-        <Button variant="ghost" size="icon" className="relative rounded-xl" aria-label="Notificaciones">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative rounded-xl"
+          aria-label="Notificaciones"
+        >
           <Bell className="size-4" />
           <span className="absolute right-2 top-2 size-2 rounded-full bg-primary" />
         </Button>
         <Avatar className="size-9 border border-border">
           <AvatarFallback className="brand-gradient-bg text-xs font-semibold text-primary-foreground">
-            {currentUser.name.slice(0, 2).toUpperCase()}
+            {(session?.username ?? "AD").slice(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </div>

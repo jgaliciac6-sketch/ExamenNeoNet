@@ -1,6 +1,12 @@
-import { useState } from "react";
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { useMutation } from "@tanstack/react-query";
 import { Eye, EyeOff, Gamepad2, Lock, User } from "lucide-react";
+import { toast } from "sonner";
 
 import heroImage from "@/assets/login-hero.jpg";
 import { Button } from "@/components/ui/button";
@@ -8,42 +14,43 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card } from "@/components/ui/card";
+import { login } from "@/lib/api/auth";
+import { setSession } from "@/lib/auth-storage";
 
-export const Route = createFileRoute("/login")({
-  head: () => ({
-    meta: [
-      { title: "Iniciar sesión | Nexus Games" },
-      {
-        name: "description",
-        content:
-          "Accede al panel administrativo de Nexus Games para gestionar productos, clientes y ventas.",
-      },
-      { property: "og:title", content: "Iniciar sesión | Nexus Games" },
-      {
-        property: "og:description",
-        content: "Panel administrativo de la tienda de videojuegos Nexus Games.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: LoginPage,
-});
-
-function LoginPage() {
-  const navigate = useNavigate();
+export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("");
+
+  const mutation = useMutation({
+    mutationFn: login,
+    onSuccess: (data) => {
+      setSession({ username: data.usrNombre });
+      router.push("/ventas");
+    },
+    onError: () => {
+      toast.error("No se pudo iniciar sesión", {
+        description: "Verifica tus credenciales o intenta de nuevo más tarde.",
+      });
+    },
+  });
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    mutation.mutate({ usrNombre: username, usrPassword: password });
+  }
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       {/* Lado visual */}
       <section className="relative hidden overflow-hidden lg:block">
-        <img
+        <Image
           src={heroImage}
           alt="Setup gaming moderno con iluminación ambiental violeta"
-          width={1024}
-          height={1536}
-          className="absolute inset-0 size-full object-cover"
+          fill
+          priority
+          className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-background/30" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,oklch(0.55_0.2_287/0.35),transparent_60%)]" />
@@ -74,19 +81,18 @@ function LoginPage() {
             Inicia sesión para acceder al sistema
           </p>
 
-          <form
-            className="mt-8 space-y-5"
-            onSubmit={(e) => {
-              e.preventDefault();
-              // Sin autenticación real: navegación directa al dashboard.
-              navigate({ to: "/dashboard" });
-            }}
-          >
+          <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="username">Usuario</Label>
               <div className="relative">
                 <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input id="username" name="username" defaultValue="admin" className="h-11 pl-9" />
+                <Input
+                  id="username"
+                  name="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="h-11 pl-9"
+                />
               </div>
             </div>
 
@@ -99,6 +105,8 @@ function LoginPage() {
                   name="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="h-11 px-9"
                 />
                 <button
@@ -119,14 +127,18 @@ function LoginPage() {
               </Label>
             </div>
 
-            <Button type="submit" className="h-11 w-full rounded-xl text-sm font-medium">
-              Iniciar sesión
+            <Button
+              type="submit"
+              className="h-11 w-full rounded-xl text-sm font-medium"
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? "Iniciando sesión..." : "Iniciar sesión"}
             </Button>
           </form>
 
           <p className="mt-8 text-center text-xs text-muted-foreground">
             ¿Problemas para acceder?{" "}
-            <Link to="/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-primary hover:underline">
               Contacta al administrador
             </Link>
           </p>
