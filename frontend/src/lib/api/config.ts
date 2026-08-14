@@ -1,3 +1,5 @@
+import { getToken } from "@/lib/auth-storage";
+
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
 export class ApiError extends Error {
@@ -10,11 +12,17 @@ export class ApiError extends Error {
   }
 }
 
+function authHeader(): Record<string, string> {
+  if (typeof window === "undefined") return {};
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
 export async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
     res = await fetch(`${API_BASE_URL}${path}`, {
-      headers: { "Content-Type": "application/json", ...init?.headers },
+      headers: { "Content-Type": "application/json", ...authHeader(), ...init?.headers },
       ...init,
     });
   } catch {

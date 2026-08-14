@@ -2,6 +2,7 @@ const STORAGE_KEY = "nexus-games.session";
 
 export interface Session {
   username: string;
+  token: string;
 }
 
 export function getSession(): Session | null {
@@ -21,4 +22,8 @@ export function setSession(session: Session) {
 
 export function clearSession() {
   window.localStorage.removeItem(STORAGE_KEY);
+}
+
+export function getToken(): string | null {
+  return getSession()?.token ?? null;
 }

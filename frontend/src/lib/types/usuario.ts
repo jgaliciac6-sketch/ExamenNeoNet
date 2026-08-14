@@ -12,7 +12,10 @@ export interface LoginRequest {
   usrPassword: string;
 }
 
+// Forma real de la respuesta de POST /api/Login/Login (LoginController.cs), que
+// devuelve un objeto anónimo, no el modelo Usuario.
 export interface LoginResponse {
-  usrId: number;
-  usrNombre: string;
+  token: string;
+  id: number;
+  nombre: string;
 }

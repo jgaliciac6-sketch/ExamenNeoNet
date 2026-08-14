@@ -1,8 +1,8 @@
 import { fetchJson } from "./config";
 import type { LoginRequest, LoginResponse } from "@/lib/types";
 
-// Placeholder: ajustar cuando el backend exponga el login.
-const LOGIN_PATH = "/api/Usuario/Login";
+// Controllers/LoginController.cs -> ruta "api/[controller]/[action]" = api/Login/Login.
+const LOGIN_PATH = "/api/Login/Login";
 
 export function login(data: LoginRequest) {
   return fetchJson<LoginResponse>(LOGIN_PATH, {

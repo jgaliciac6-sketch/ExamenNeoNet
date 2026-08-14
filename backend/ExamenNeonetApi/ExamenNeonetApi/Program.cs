@@ -1,26 +1,94 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Controllers
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-const string FrontendCorsPolicy = "FrontendCorsPolicy";
+
+// ================================
+// JWT
+// ================================
+
+var jwtSettings =
+	builder.Configuration.GetSection("Jwt");
+
+string secretKey =
+	jwtSettings["SecretKey"]!;
+
+builder.Services
+	.AddAuthentication(options =>
+	{
+		options.DefaultAuthenticateScheme =
+			JwtBearerDefaults.AuthenticationScheme;
+
+		options.DefaultChallengeScheme =
+			JwtBearerDefaults.AuthenticationScheme;
+	})
+	.AddJwtBearer(options =>
+	{
+		options.TokenValidationParameters =
+			new TokenValidationParameters
+			{
+				ValidateIssuer = true,
+				ValidateAudience = true,
+				ValidateLifetime = true,
+				ValidateIssuerSigningKey = true,
+
+				ValidIssuer =
+					jwtSettings["Issuer"],
+
+				ValidAudience =
+					jwtSettings["Audience"],
+
+				IssuerSigningKey =
+					new SymmetricSecurityKey(
+						Encoding.UTF8.GetBytes(
+							secretKey
+						)
+					),
+
+				ClockSkew = TimeSpan.Zero
+			};
+	});
+
+builder.Services.AddAuthorization();
+
+
+// ================================
+// CORS
+// ================================
+
+const string FrontendCorsPolicy =
+	"FrontendCorsPolicy";
+
 builder.Services.AddCors(options =>
 {
-	options.AddPolicy(FrontendCorsPolicy, policy =>
-	{
-		policy.WithOrigins("http://localhost:3000")
-			.AllowAnyHeader()
-			.AllowAnyMethod();
-	});
+	options.AddPolicy(
+		FrontendCorsPolicy,
+		policy =>
+		{
+			policy
+				.WithOrigins(
+					"http://localhost:3000"
+				)
+				.AllowAnyHeader()
+				.AllowAnyMethod();
+		});
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+// ================================
+// Pipeline
+// ================================
+
 if (app.Environment.IsDevelopment())
 {
 	app.UseSwagger();
@@ -31,6 +99,8 @@ app.UseHttpsRedirection();
 
 app.UseCors(FrontendCorsPolicy);
 
+// IMPORTANTE
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

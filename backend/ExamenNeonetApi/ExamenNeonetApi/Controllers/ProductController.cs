@@ -1,11 +1,13 @@
 ﻿using ExamenNeonetApi.Datos;
 using ExamenNeonetApi.Model;
 using ExamenNeonetApi.Negocio;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExamenNeonetApi.Controllers
 {
 	[Route("api/[controller]")]
+	[Authorize]
 	public class ProductController : Controller
 	{
 		[HttpGet]

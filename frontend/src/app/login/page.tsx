@@ -26,12 +26,12 @@ export default function LoginPage() {
   const mutation = useMutation({
     mutationFn: login,
     onSuccess: (data) => {
-      setSession({ username: data.usrNombre });
+      setSession({ username: data.nombre, token: data.token });
       router.push("/ventas");
     },
     onError: () => {
       toast.error("No se pudo iniciar sesión", {
-        description: "Verifica tus credenciales o intenta de nuevo más tarde.",
+        description: "Usuario o contraseña incorrectos.",
       });
     },
   });
