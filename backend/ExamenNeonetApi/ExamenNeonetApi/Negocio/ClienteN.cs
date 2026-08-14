@@ -5,11 +5,11 @@ using RegistroSucursales.Datos;
 
 namespace ExamenNeonetApi.Negocio
 {
-	public class ProductN
+	public class ClienteN
 	{
-		public async Task<List<Product>> GetProduct()
+		public async Task<List<Cliente>> GetClients()
 		{
-			List<Product> lstProducts = new List<Product>();
+			List<Cliente> lstCliente = new List<Cliente>();
 
 			using (SqlConnection conn = new SqlConnection(new Conexion().GetCadenaSQL()))
 			{
@@ -17,13 +17,13 @@ namespace ExamenNeonetApi.Negocio
 
 				try
 				{
-					lstProducts = await new ProductDT().GetProduct(conn);
+					lstCliente = await new ClientDT().GetClient(conn);
 
-					return lstProducts;
+					return lstCliente;
 				}
 				catch (Exception e)
 				{
-					return new List<Product>();
+					return new List<Cliente>();
 				}
 			}
 		}

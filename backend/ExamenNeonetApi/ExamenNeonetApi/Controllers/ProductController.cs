@@ -12,9 +12,9 @@ namespace ExamenNeonetApi.Controllers
 		[Route("GetProduct")]
 		public async Task<IActionResult> GetProduct()
 		{
-			List<Product> lstEmpresa = new List<Product>();
-			lstEmpresa = await new ProductN().GetProduct();
-			return StatusCode(200, lstEmpresa);
+			List<Product> lstProducto = new List<Product>();
+			lstProducto = await new ProductN().GetProduct();
+			return StatusCode(200, lstProducto);
 		}
 	}
 }

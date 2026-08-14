@@ -8,7 +8,7 @@ namespace ExamenNeonetApi.Datos
 	{
 		public async Task<List<Product>> GetProduct(SqlConnection conn)
 		{
-			List<Product> lstEmpresa = new List<Product>();
+			List<Product> lstProducts = new List<Product>();
 
 			try
 			{
@@ -20,7 +20,7 @@ namespace ExamenNeonetApi.Datos
 
 				while (dr.Read())
 				{
-					lstEmpresa.Add(new Product()
+					lstProducts.Add(new Product()
 					{
 						PROId = Convert.ToInt32(dr["PROId"]),
 						PRONombre = dr["PRONombre"].ToString(),
@@ -36,7 +36,7 @@ namespace ExamenNeonetApi.Datos
 				new List<Product>();
 			}
 
-			return lstEmpresa;
+			return lstProducts;
 		}
 	}
 }
