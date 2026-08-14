@@ -461,9 +461,22 @@ BEGIN
 
     -- Insert statements for procedure here
 	BEGIN TRY
-		UPDATE EX_PRODUCTO SET PROStock = PROStock - @Cantidad WHERE PROId = @PROId
+		DECLARE @StockActual INT
 
-		SET @SUCCESS = 1
+		SELECT @StockActual = PROStock FROM EX_PRODUCTO WITH (NOLOCK) WHERE PROId = @PROId
+
+		IF (@StockActual > @Cantidad)
+		BEGIN
+			UPDATE EX_PRODUCTO SET PROStock = PROStock - @Cantidad WHERE PROId = @PROId
+			SET @SUCCESS = 1
+		END
+
+		ELSE
+		BEGIN
+			SET @SUCCESS = 0
+			SET @MESSAGE = 'La cantidad de artículos es mayor al stock'
+		END
+		
 	END TRY
 
 	BEGIN CATCH
