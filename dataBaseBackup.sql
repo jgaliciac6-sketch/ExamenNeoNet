@@ -465,7 +465,7 @@ BEGIN
 
 		SELECT @StockActual = PROStock FROM EX_PRODUCTO WITH (NOLOCK) WHERE PROId = @PROId
 
-		IF (@StockActual > @Cantidad)
+		IF (@StockActual => @Cantidad)
 		BEGIN
 			UPDATE EX_PRODUCTO SET PROStock = PROStock - @Cantidad WHERE PROId = @PROId
 			SET @SUCCESS = 1
