@@ -3,6 +3,7 @@ node_modules/
 .next/
 dist/
 out/
+
 # .env
 # .env.*
 
@@ -12,6 +13,10 @@ obj/
 *.user
 *.suo
 #.env
+
+# Visual Studio
+.vs/
+**/.vs/
 
 # General
 .DS_Store

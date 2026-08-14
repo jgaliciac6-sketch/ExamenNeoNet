@@ -1,0 +1,6 @@
+@ExamenNeonetApi_HostAddress = http://localhost:5208
+
+GET {{ExamenNeonetApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
